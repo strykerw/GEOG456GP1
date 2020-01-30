@@ -1,5 +1,5 @@
-Getting Start
--------------
+Getting Started
+---------------
 
 We will be looking at bike crash data for North Carolina collected by
 the North Carolina Department of Transportation between 2007-2018. This
@@ -9,7 +9,7 @@ data can be downloaded from the Durham open data website:
 Now let’s import the data:
 
 ``` r
-the_file <- "/Users/strykerw/Downloads/bikecrashnew.csv" ## the downloaded file should say NCDOT_Bike_Crash_Data. I changed the file name for personal purposes, but you should import according to how you saved it on your computer. Just make sure the file is CSV format
+the_file <- "/Users/strykerw/Downloads/bikecrashnew.csv" ## the downloaded file should say NCDOT_Bike_Crash_Data. I changed the file name for personal purposes, but you should import according to how you saved it on your computer. Just make sure the file is in CSV format
 
 df <- read.csv(the_file) ## open a CSV
 
@@ -108,28 +108,88 @@ head(df) ## use this function to see the column names and the first six rows of 
     ## 5 Double Yellow Line, No Passing Zone   Clear       No
     ## 6                  Stop And Go Signal   Clear       No
 
-When you click the **Knit** button a document will be generated that
-includes both content as well as the output of any embedded R code
-chunks within the document. You can embed an R code chunk like this:
+As you can see, the column headings are straight forward. You can change
+them if you’d like using the names(df)function: names(df) \<- c(“insert
+column name here”,“insert column name here”…). I am going to keep my
+columns as they are.
+
+We must now install the ggplot2 and RColorBrewer libraries. We will need
+them later.
 
 ``` r
-summary(cars)
+#install.packages("ggplot2") ## take out the hash-symbol at the beginning of this line if you want to run this line in R. 
+#install.packages("RColorBrewer")
+#After installing the packages you need to open the libraries.
+library(ggplot2)
+library(RColorBrewer)
 ```
 
-    ##      speed           dist       
-    ##  Min.   : 4.0   Min.   :  2.00  
-    ##  1st Qu.:12.0   1st Qu.: 26.00  
-    ##  Median :15.0   Median : 36.00  
-    ##  Mean   :15.4   Mean   : 42.98  
-    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
-    ##  Max.   :25.0   Max.   :120.00
+Density
+-------
 
-Including Plots
----------------
+When first looking at the data, I just wanted to see a general trend of
+when bike crashes were happening per hour. The density function allows
+us to look at the percent occurrence of all data points across one
+variable. In this instance I wanted to look at the data (which was 11266
+NC bike crash incidents that ocurred between 2007-2018) by the hour time
+dimension within a day.
 
-You can also embed plots, for example:
+``` r
+p <- ggplot(df, aes(x=CrashHour)) + 
+  geom_density() ##the x value should be equal to the CrashHour column because that indicates what time of day the crash ocurred. The geom_density() function will then plot all points in the data frame (the crash incidents) corresponding to that variable
+p ## we set p equal to the density function so this will now plot p
+```
 
-![](testcrash_files/figure-markdown_github/pressure-1.png)
+![](testcrash_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.
+As you can see, most crashes occur around afternoon rush hour (around
+the 17th hour of the day, or 5pm). It is interesting, however, that
+there are not two peaks— one being for the morning rush hour as well.
+This can indicate that policy makers may need to focus safety efforts on
+afternoon rush hour commute times.
+
+Frequency Polygon
+-----------------
+
+This graph is interesting, but let’s add another variable: the race of
+the cyclist in the accident. Perhaps differences in crashes throughout
+the day among races may indicate different patterns in travel behavior
+(for example, different races may be commuting more frequently at
+different hours of the day). To incorporate this other variable, we will
+need to use the frequency polygon function.
+
+``` r
+p <- ggplot(df, aes(x=CrashHour, colour=BikeRace)) + geom_freqpoly(binwidth=1) +
+  scale_x_continuous(breaks=c(0,2,4,6,8,10,12,14,16,18,20,22,24))+ labs (title = "Crash Frequency per Hour by Race of NC Cyclists", x = "Crash Hour", y = "Number of Crashes")
+p ## you can see the process of the code explained below the graphic
+```
+
+![](testcrash_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+``` r
+## We continued to use the CrashHour column as the x variable (because it is the time element). We can also differentiate the frequency lines of crash incidents by race, and make them visibly different by default colors by setting colour = Bike Race. Note: bike race is the column in the data set that corresponds with the race of the cyclist who crashed.
+
+## binwidth deals with the scale of the x value. I played with changing the binwidth to best display the data, but let's choose a bandwidth of 1 for now. Unlike the density function, the geom_freqpoly function shows the raw frequency of crashes, and I categorized this by race over the time variable of crash hour.
+
+## the scale_x function_continous() function allows you to manually change the breaks on the axes. I manually changed the breaks to show numbers for every two hours within a day along the x-axis. The labs function then allows you to specify the title of the visualization (title = "name  here"), the title of the x-axis (x = "namehere"), and the title of the y-axis ("name here")
+
+## then plot p (what we assigned the function to)
+```
+
+This visualization provides us with a better idea of how bike crash
+occurences within the last decade have been distributed across the day
+by race, and the comprehensiveness of the data set allow us to see a
+clearer trend. Crashes for almost every race peak at the 5pm rush hour
+time, but it also gives you an idea of bike ridership: Whites and Blacks
+get in more crashes, and this is likely because more of them ride bikes.
+It would be interesting in the future to look at this data
+proportionally in order to compare crash occurrence by race vs the
+number of active cyclists within that race.
+
+This data can continue to be manipulated, but let’s look at what my
+project partners have visualized with the same data!
+
+Note: you can also use the csv file to filter the data by city, county,
+etc. I saved the data into a new csv file that only included bike
+crashes within Orange County to see if crash incidences by race across
+the day vary from the state-level data.
