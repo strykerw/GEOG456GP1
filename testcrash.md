@@ -1,5 +1,5 @@
-Getting Started
----------------
+Getting Start
+-------------
 
 We will be looking at bike crash data for North Carolina collected by
 the North Carolina Department of Transportation between 2007-2018. This
